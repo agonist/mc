@@ -1,4 +1,4 @@
-baseURL = "http://example.org/"
+baseURL = "https://agonist.github.io/mc/"
 languageCode = "en-us"
 title = "Martabak Cult Engineering"
 theme = "m10c"
