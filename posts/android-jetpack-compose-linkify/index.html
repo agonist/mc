@@ -1,0 +1,77 @@
+<!doctype html><html lang=en-us><head><title>Android Jetpack Compose Linkify // Martabak Cult Engineering</title><link rel="shortcut icon" href=/favicon.ico><meta charset=utf-8><meta name=generator content="Hugo 0.80.0"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=author content="Martabak Cult"><meta name=description content><link rel=stylesheet href=http://example.org/css/main.min.68e582a4d4ed824d6b7e3b5b37cae47eb3779bd631046379d0e68b38230cc3e2.css><meta name=twitter:card content="summary"><meta name=twitter:title content="Android Jetpack Compose Linkify"><meta name=twitter:description content="Linkify your text with Jetpack Compose Before Jetpack Compose, if you wanted to Linkify all links within a TextView it was quite straightforward. You only needed one line of code:
+Linkify.addLinks(myTextView, Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS) But with Compose it&rsquo;s a different story. No more of this one magic line.
+Here&rsquo;s what I ended up with to have my links working again:
+@Composable fun LinkifyText(text: String, modifier: Modifier = Modifier) { val uriHandler = AmbientUriHandler."><meta property="og:title" content="Android Jetpack Compose Linkify"><meta property="og:description" content="Linkify your text with Jetpack Compose Before Jetpack Compose, if you wanted to Linkify all links within a TextView it was quite straightforward. You only needed one line of code:
+Linkify.addLinks(myTextView, Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS) But with Compose it&rsquo;s a different story. No more of this one magic line.
+Here&rsquo;s what I ended up with to have my links working again:
+@Composable fun LinkifyText(text: String, modifier: Modifier = Modifier) { val uriHandler = AmbientUriHandler."><meta property="og:type" content="article"><meta property="og:url" content="http://example.org/posts/android-jetpack-compose-linkify/"><meta property="article:published_time" content="2021-02-18T10:28:36+08:00"><meta property="article:modified_time" content="2021-02-18T10:28:36+08:00"></head><body><header class=app-header><a href=http://example.org/><img class=app-header-avatar src=/avatar.jpg alt="Martabak Cult"></a><h1>Martabak Cult Engineering</h1><p>Code offering for the Martabak god</p><div class=app-header-social></div></header><main class=app-container><article class=post><header class=post-header><h1 class=post-title>Android Jetpack Compose Linkify</h1><div class=post-meta><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Feb 18, 2021</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>2 min read</div></div></header><div class=post-content><h1 id=linkify-your-text-with-jetpack-compose>Linkify your text with Jetpack Compose</h1><p>Before Jetpack Compose, if you wanted to <code>Linkify</code> all links within a <code>TextView</code> it was quite straightforward. You only needed one line of code:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin>Linkify.addLinks(myTextView, Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS)
+</code></pre></div><p>But with Compose it&rsquo;s a different story. No more of this one magic line.</p><p>Here&rsquo;s what I ended up with to have my links working again:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#a6e22e>@Composable</span>
+<span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>LinkifyText</span>(text: String, modifier: Modifier = Modifier) {
+    <span style=color:#66d9ef>val</span> uriHandler = AmbientUriHandler.current
+    <span style=color:#66d9ef>val</span> layoutResult = remember {
+        mutableStateOf&lt;TextLayoutResult?&gt;(<span style=color:#66d9ef>null</span>)
+    }
+    <span style=color:#66d9ef>val</span> linksList = extractUrls(text)
+    <span style=color:#66d9ef>val</span> annotatedString = buildAnnotatedString {
+        append(text)
+        linksList.forEach {
+            addStyle(
+                    style = SpanStyle(
+                            color = Color.Companion.Blue,
+                            textDecoration = TextDecoration.Underline
+                    ),
+                    start = <span style=color:#66d9ef>it</span>.start,
+                    end = <span style=color:#66d9ef>it</span>.end
+            )
+            addStringAnnotation(
+                    tag = <span style=color:#e6db74>&#34;URL&#34;</span>,
+                    <span style=color:#66d9ef>annotation</span> = <span style=color:#66d9ef>it</span>.url,
+                    start = <span style=color:#66d9ef>it</span>.start,
+                    end = <span style=color:#66d9ef>it</span>.end
+            )
+        }
+    }
+    Text(text = annotatedString, style = MaterialTheme.typography.body1, modifier = modifier.tapGestureFilter { offsetPosition <span style=color:#f92672>-&gt;</span>
+        layoutResult.value<span style=color:#f92672>?.</span>let {
+            <span style=color:#66d9ef>val</span> position = <span style=color:#66d9ef>it</span>.getOffsetForPosition(offsetPosition)
+            annotatedString.getStringAnnotations(position, position).firstOrNull()
+                    <span style=color:#f92672>?.</span>let { result <span style=color:#f92672>-&gt;</span>
+                        <span style=color:#66d9ef>if</span> (result.tag <span style=color:#f92672>==</span> <span style=color:#e6db74>&#34;URL&#34;</span>) {
+                            uriHandler.openUri(result.item)
+                        }
+                    }
+        }
+    }, onTextLayout = { layoutResult.value = <span style=color:#66d9ef>it</span> })
+}
+</code></pre></div><p>It&rsquo;s mostly based on using <a href=https://developer.android.com/reference/kotlin/androidx/compose/ui/text/AnnotatedString>AnnotatedString</a> which let you manipulate a Text style in a simple way.</p><p>The <code>extractUrls</code> function is a small utility function that find all the URL within the string.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>val</span> urlPattern: Pattern = Pattern.compile(
+        <span style=color:#e6db74>&#34;(?:^|[</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>W])((ht|f)tp(s?):</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>/</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>/|www</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>.)&#34;</span>
+                + <span style=color:#e6db74>&#34;(([</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>w</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>-]+</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>.){1,}?([</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>w</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>-.~]+</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>/?)*&#34;</span>
+                + <span style=color:#e6db74>&#34;[</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>p{Alnum}.,%_=?&amp;#</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>-+()</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>[</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>]</span><span style=color:#ae81ff>\\</span><span style=color:#e6db74>*$~@!:/{};&#39;]*)&#34;</span>,
+        Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL
+)
+
+<span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>extractUrls</span>(text: String): List&lt;LinkInfos&gt; {
+    <span style=color:#66d9ef>val</span> matcher = urlPattern.matcher(text)
+    <span style=color:#66d9ef>val</span> links = arrayListOf&lt;LinkInfos&gt;()
+
+    <span style=color:#66d9ef>while</span> (matcher.find()) {
+        <span style=color:#66d9ef>val</span> matchStart = matcher.start(<span style=color:#ae81ff>1</span>)
+        <span style=color:#66d9ef>val</span> matchEnd = matcher.end()
+
+        <span style=color:#66d9ef>var</span> url = text.substring(matchStart, matchEnd)
+        <span style=color:#66d9ef>if</span> (!url.startsWith(<span style=color:#e6db74>&#34;http://&#34;</span>) <span style=color:#f92672>&amp;&amp;</span> !url.startsWith(<span style=color:#e6db74>&#34;https://&#34;</span>))
+            url = <span style=color:#e6db74>&#34;https://</span><span style=color:#e6db74>$url</span><span style=color:#e6db74>&#34;</span>
+
+        links.add(LinkInfos(url, matchStart, matchEnd))
+    }
+    <span style=color:#66d9ef>return</span> links
+}
+
+<span style=color:#66d9ef>data</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>LinkInfos</span>(
+        <span style=color:#66d9ef>val</span> url: String,
+        <span style=color:#66d9ef>val</span> start: Int,
+        <span style=color:#66d9ef>val</span> end: Int
+)
+</code></pre></div><p>And that&rsquo;s it. You can now use this <code>LinkifyText</code> in your views.</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#66d9ef>val</span> textWithLinks = <span style=color:#e6db74>&#34;Eat Martabak and stay healthy -&gt; https://indonesiaexpat.id/wp-content/uploads/2018/11/martabak-manis.jpg don&#39;t you think it looks good?&#34;</span>
+LinkifyText(textWithLinks)
+</code></pre></div></div><div class=post-footer></div></article></main></body></html>
