@@ -1,0 +1,8 @@
+baseURL = "http://example.org/"
+languageCode = "en-us"
+title = "Martabak Cult Engineering"
+theme = "m10c"
+
+[params]
+  author = "Martabak Cult"
+  description = "Code offering for the Martabak god"
